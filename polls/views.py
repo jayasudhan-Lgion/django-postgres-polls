@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Question, Choice
 from django.core.paginator import Paginator
+from django.contrib.auth.forms import UserCreationForm
 
 
 def index(request):
@@ -57,3 +58,14 @@ def results(request, question_id):
             "total_votes": total_votes,
         },
     )
+
+
+def signup(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("login")
+    else:
+        form = UserCreationForm()
+    return render(request, "polls/signup.html", {"form": form})
