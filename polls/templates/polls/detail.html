@@ -2,6 +2,9 @@
 
 {% block content %}
 <h1>{{ question.question_text }}</h1>
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
 <form action="/polls/{{ question.id }}/vote/" method="post">
     {% csrf_token %}
     {% for choice in question.choice_set.all %}

@@ -1,11 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Question, Choice
+from django.core.paginator import Paginator
 
 
 def index(request):
     all_questions = Question.objects.order_by("-pub_date")
-    context = {"all_questions": all_questions}
-    return render(request, "polls/index.html", context)
+    paginator = Paginator(all_questions, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, "polls/index.html", {"page_obj": page_obj})
 
 
 def detail(request, question_id):
@@ -15,7 +18,42 @@ def detail(request, question_id):
 
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    selected_choice = question.choice_set.get(pk=request.POST["choice"])
-    selected_choice.votes += 1
-    selected_choice.save()
-    return redirect("detail", question_id=question.id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST["choice"])
+    except (KeyError, Choice.DoesNotExist):
+        return render(
+            request,
+            "polls/detail.html",
+            {
+                "question": question,
+                "error_message": "You didn't select a choice.",
+            },
+        )
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        return redirect("results", question_id=question.id)
+
+
+def results(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    choices = question.choice_set.all()
+    total_votes = sum(choice.votes for choice in choices)
+
+    choice_data = []
+    for choice in choices:
+        if total_votes > 0:
+            percentage = round((choice.votes / total_votes) * 100)
+        else:
+            percentage = 0
+        choice_data.append({"choice": choice, "percentage": percentage})
+
+    return render(
+        request,
+        "polls/results.html",
+        {
+            "question": question,
+            "choice_data": choice_data,
+            "total_votes": total_votes,
+        },
+    )

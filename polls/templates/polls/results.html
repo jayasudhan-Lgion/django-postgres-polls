@@ -1,0 +1,11 @@
+{% extends "polls/base.html" %}
+
+{% block content %}
+<h1>{{ question.question_text }}</h1>
+<ul>
+{% for item in choice_data %}
+    <li>{{ item.choice.choice_text }} — {{ item.choice.votes }} votes ({{ item.percentage }}%)</li>
+{% endfor %}
+</ul>
+<a href="/polls/{{ question.id }}/">Vote again</a>
+{% endblock %}
