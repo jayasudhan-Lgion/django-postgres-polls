@@ -142,3 +142,4 @@ MAILERS = {
     },
 }
 LOGIN_REDIRECT_URL = "index"
+LOGIN_URL = "login"

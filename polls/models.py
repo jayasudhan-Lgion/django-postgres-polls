@@ -1,9 +1,13 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Question(models.Model):
     question_text = models.CharField(max_length=200)
     pub_date = models.DateTimeField("date published")
+    voted_users = models.ManyToManyField(
+        User, blank=True, related_name="voted_questions"
+    )
 
     def __str__(self):
         return self.question_text

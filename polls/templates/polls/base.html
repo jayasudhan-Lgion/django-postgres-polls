@@ -50,9 +50,24 @@ label {
 </head>
 <body>
     <div class="container">
-        {% if request.resolver_match.url_name == 'detail' or request.resolver_match.url_name == 'results' %}
-    <a href="/polls/" style="font-size: 14px; color: #666;">&larr; All Polls</a>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #eee;">
+    {% if request.resolver_match.url_name != 'index' %}
+<a href="/polls/" style="font-size: 14px; color: #666; text-decoration:none;">← All Polls</a>
+{% endif %}
+    <div style="font-size:14px; margin-left:auto;">
+        {% if user.is_authenticated %}
+            <span style="color:#333;">Hello, {{ user.username }}</span>
+            <form action="{% url 'logout' %}" method="post" style="display:inline; margin-left:10px;">
+                {% csrf_token %}
+                <button type="submit" style="background:none; border:none; color:#2563eb; cursor:pointer; font-size:14px; padding:0;">Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" style="color:#2563eb; text-decoration:none;">Login</a>
+            <span style="color:#ccc;"> | </span>
+            <a href="{% url 'signup' %}" style="color:#2563eb; text-decoration:none;">Sign Up</a>
         {% endif %}
+    </div>
+</div>
         {% block content %}
         {% endblock %}
     </div>

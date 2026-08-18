@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from .models import Question, Choice
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -17,8 +18,20 @@ def detail(request, question_id):
     return render(request, "polls/detail.html", {"question": question})
 
 
+@login_required
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
+
+    if question.voted_users.filter(id=request.user.id).exists():
+        return render(
+            request,
+            "polls/detail.html",
+            {
+                "question": question,
+                "error_message": "You have already voted on this question.",
+            },
+        )
+
     try:
         selected_choice = question.choice_set.get(pk=request.POST["choice"])
     except (KeyError, Choice.DoesNotExist):
@@ -33,6 +46,7 @@ def vote(request, question_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
+        question.voted_users.add(request.user)
         return redirect("results", question_id=question.id)
 
 
